@@ -11,6 +11,8 @@ firmware/stm32f411/  register-level OTG FS driver, clock, GPIO/ADC, superloop, l
 tests/               host unit tests (test_*) and property-based tests (pbt_*)
 specs/               TLA+ models (Debounce, UsbHid) and seeded-bug configs
 sim/                 SwiftUI simulator (Package.swift at the root)
+sim/emu/             full-system emulator: real firmware ELF on an emulated STM32F411, exported over USB/IP
+docker/              image that builds the firmware and runs the USB/IP end-to-end test
 policy/              hardware profile and commit template
 policy-src/          gp_commit_msg policy (Rust → WASM)
 tools/               propose wrapper, policy build, TLC check, flash, bundle, size budget
@@ -21,7 +23,7 @@ tools/               propose wrapper, policy build, TLC check, flash, bundle, si
 | | |
 |---|---|
 | USB | Full speed, VID:PID `1209:0001` (pid.codes test ID: change before distributing), serial from the 96-bit UID |
-| HID | Generic Desktop / **Game Pad**, one 8-byte input report on EP1 IN every 1 ms when it changes |
+| HID | Generic Desktop / **Game Pad**, one 8-byte input report on EP1 IN: within 1 ms of a change, and repeated every 50 ms (keepalive, see below) |
 | Report | 16 buttons · hat (0–7, 8 = centred) · X Y Z Rz (−127…127) · sequence counter |
 | Pins | Buttons PB0 PB1 PB3–PB10 PB12–PB15 PA8 PA15 · D-pad PA9 PA10 PC14 PC15 · sticks PA1–PA4 · LED PC13 (all inputs active-low) |
 | Clock | 25 MHz crystal → 96 MHz SYSCLK, 48 MHz USB |
@@ -44,6 +46,37 @@ it uses about 6 KB of flash and 4 KB of RAM.
 
 Property-based tests print a shrunk counterexample and a replay line on failure:
 `PBT_SEED=<seed> PBT_RUNS=1 build/host/tests/pbt_input`. `PBT_RUNS` raises the case count.
+
+## Full-system simulation in Docker
+
+```sh
+tools/docker-sim.sh          # build firmware from source, emulate it, let Linux enumerate it (about 20 s warm)
+tools/docker-sim.sh --shell  # same image, interactive
+```
+
+The real `gamepad.elf` runs on an emulated Cortex-M4 (Unicorn) with register-level models
+of the RCC, PWR, FLASH, GPIO, ADC1, SysTick and the **USB OTG FS core**, written from RM0383.
+Clock gating, pull-ups and the OTG RX/TX FIFO protocol are modelled, so firmware mistakes there
+show up too. The emulated device is exported over **USB/IP**, and in the same privileged
+container `usbip attach` hands it to the **Linux kernel's own USB and HID stack**
+(`vhci_hcd`, `usbhid`, evdev).
+
+The test checks:
+- **Clocks and connection:** the clock tree is 96/48 MHz and the firmware soft-connects.
+- **Kernel enumeration:** the strings, serial, speed and HID class Linux reads.
+- **Report descriptor:** the kernel's copy is byte-identical to the firmware's `s_report`.
+- **Input path:** evdev codes and ranges for 16 buttons, the sticks and the hat.
+- **Debounce:** a 3 ms glitch is rejected and an 8 ms press registers, in virtual time.
+- **Reset:** after a detach and reattach with a button held, Linux still sees the held button.
+
+Time is virtual (1 instruction = 1 cycle at 96 MHz), so the emulator runs slower than real time
+but timing-dependent firmware behaviour is exact.
+
+**What it found.** For about 50 ms after an application opens the device, Linux `usbhid`
+discards input reports (`HID_RESUME_RUNNING`). The original firmware sent reports only when
+they changed (SET_IDLE 0), so a button held before the open was never reported. The firmware now
+re-sends its state every 50 ms (`GP_TX_KEEPALIVE_MS`). `specs/UsbHid.tla` models the drop
+window: `UsbHidNoKeepalive.cfg` reproduces the bug in TLC, and a PBT property guards it too.
 
 ## Simulator
 
@@ -69,10 +102,11 @@ tools/bundle-sim.sh             # build/GamepadSim.app
 
 `specs/Debounce.tla` models the integrator in `gp_input.c` (a stable input is reported
 within the window, shorter glitches never register, the output never moves against the
-input). `specs/UsbHid.tla` models enumeration, EP1 and the report scheduler. It shows that
-the firmware must re-initialise the scheduler after every bus reset or reconfiguration
-(`usb_take_link_change()` in `main.c`), or the host can be left with a stale state forever.
-`DebounceBug.cfg` and `UsbHidBug.cfg` seed those bugs and must fail. `tools/check-tla.sh`
+input). `specs/UsbHid.tla` models enumeration, EP1, the report scheduler and a host that opens and
+closes the device and drops reports right after each open. Without the keepalive
+(`UsbHidNoKeepalive.cfg`), or without the keepalive and the scheduler re-init after a bus reset
+(`UsbHidNoReinit.cfg`), the host can be left with a stale state forever. Those configurations
+and `DebounceBug.cfg` seed bugs and must fail. `tools/check-tla.sh`
 also checks that the model's window equals `GP_DEBOUNCE_MS`.
 
 ## Landing changes (Nool)
@@ -105,6 +139,7 @@ Every proposal also runs:
 | `tla-model-check` | TLC on both models, seeded bugs must fail |
 | `firmware-build` | `-Werror` cross build and flash/RAM budget |
 | `sim-tests` | `swift test` |
+| `docker-usbip-e2e` | `tools/docker-sim.sh`: real firmware, emulated MCU, Linux USB/HID stack |
 
 After editing `policy/hardware-profile.toml`, rebuild and re-pin the policies:
 `tools/build-policies.sh`, then `nool admin plugin install … --policy --no-land`,
