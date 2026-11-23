@@ -4,7 +4,7 @@
 #
 #   tools/propose.sh --type feature|bug [--scope <scope>] --title "<title>" \
 #     --description "<why, 20+ chars>" --tested "<what was tested>" \
-#     [--task <id>] [--kind <kind>] [--justification "<text>"] [--detach] -- <path>...
+#     [--task <id>] [--kind <kind>] [--justification "<text>"] [--binary raw] [--detach] -- <path>...
 #
 # Nool enforces the same rules: the [commit] template blocks a missing
 # description or test note at the seal, and the gp_commit_msg policy blocks a
@@ -20,7 +20,7 @@ while [ $# -gt 0 ]; do
     --title) title="$2"; shift 2 ;;
     --description) desc="$2"; shift 2 ;;
     --tested) tested="$2"; shift 2 ;;
-    --task|--kind|--justification) extra+=("$1" "$2"); shift 2 ;;
+    --task|--kind|--justification|--binary) extra+=("$1" "$2"); shift 2 ;;
     --detach) extra+=("$1"); shift ;;
     --) shift; break ;;
     -h|--help) usage ;;
