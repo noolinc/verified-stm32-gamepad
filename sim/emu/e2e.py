@@ -119,7 +119,8 @@ def detach_all():
 def main():
     print(f"== firmware: {ELF}", flush=True)
     m = Machine(ELF, log=lambda s: print(s, flush=True))
-    threading.Thread(target=m.run, daemon=True).start()
+    m.thread = threading.Thread(target=m.run, daemon=True)
+    m.thread.start()
 
     print("== boot", flush=True)
     m.wait_until(lambda: m.otg.connected, virtual_ms=2000)
@@ -282,7 +283,10 @@ def diagnostics(m):
 
 
 def finish(m, server):
+    # Join the emulator thread before exiting: tearing the interpreter down
+    # while it is inside Unicorn's native emu_start segfaults (exit 139).
     m.stopping = True
+    m.thread.join(timeout=10)
     failed = [r for r in results if not r[1]]
     print(f"\n{len(results) - len(failed)}/{len(results)} checks passed" + (f"; FAILED: {[f[0] for f in failed]}" if failed else ""))
     if m.fault:
