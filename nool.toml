@@ -171,6 +171,15 @@ mode = "block"
 timeout_secs = 300
 extensions = ["c", "h", "ld", "txt", "cmake", "json"]
 
+[[reification.checks]]
+name = "sim-tests"
+# Simulator: Swift tests over the shared C core (descriptor, engine, enumeration, virtual device).
+command = ["swift", "test", "--quiet"]
+pass_files = false
+mode = "block"
+timeout_secs = 600
+extensions = ["swift", "c", "h"]
+
 [reification.dependencies]
 proto = [
     "ts",
