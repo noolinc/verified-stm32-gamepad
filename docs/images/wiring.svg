@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="880" viewBox="0 0 980 880" font-family="Helvetica,Arial,sans-serif">
+<rect width="980" height="880" fill="#ffffff"/>
+<text x="490" y="40" font-size="22" font-weight="bold" text-anchor="middle" fill="#111827">STM32F411 Black Pill wiring (top view, USB-C up)</text>
+<text x="490" y="68" font-size="14" text-anchor="middle" fill="#4b5563">Each switch connects its pin to GND (internal pull-ups, active-low).</text>
+<text x="490" y="88" font-size="14" text-anchor="middle" fill="#4b5563">Each stick is two 10 kΩ pots: ends to 3V3 and GND, wiper to the pin.</text>
+<rect x="390" y="130" width="200" height="650" rx="10" fill="#1f2937"/>
+<rect x="460" y="116" width="60" height="34" rx="6" fill="#9ca3af"/>
+<text x="490" y="138" font-size="12" text-anchor="middle" fill="#111827">USB</text>
+<rect x="445" y="380" width="90" height="90" fill="#374151" stroke="#4b5563"/>
+<text x="490" y="420" font-size="12" text-anchor="middle" fill="#e5e7eb">STM32</text>
+<text x="490" y="436" font-size="12" text-anchor="middle" fill="#e5e7eb">F411CEU6</text>
+<circle cx="408" cy="200" r="7" fill="#4b5563" stroke="#d1d5db"/>
+<text x="422" y="204" font-size="12" fill="#f9fafb" text-anchor="start">VB</text>
+<circle cx="408" cy="228" r="7" fill="#d97706" stroke="#d1d5db"/>
+<text x="422" y="232" font-size="12" fill="#f9fafb" text-anchor="start">C13</text>
+<line x1="408" y1="228" x2="350" y2="228" stroke="#d97706" stroke-width="2"/>
+<text x="342" y="233" font-size="14" fill="#d97706" text-anchor="end" font-weight="600">On-board LED</text>
+<circle cx="408" cy="256" r="7" fill="#7c3aed" stroke="#d1d5db"/>
+<text x="422" y="260" font-size="12" fill="#f9fafb" text-anchor="start">C14</text>
+<line x1="408" y1="256" x2="350" y2="256" stroke="#7c3aed" stroke-width="2"/>
+<text x="342" y="261" font-size="14" fill="#7c3aed" text-anchor="end" font-weight="600">D-pad left</text>
+<circle cx="408" cy="284" r="7" fill="#7c3aed" stroke="#d1d5db"/>
+<text x="422" y="288" font-size="12" fill="#f9fafb" text-anchor="start">C15</text>
+<line x1="408" y1="284" x2="350" y2="284" stroke="#7c3aed" stroke-width="2"/>
+<text x="342" y="289" font-size="14" fill="#7c3aed" text-anchor="end" font-weight="600">D-pad right</text>
+<circle cx="408" cy="312" r="7" fill="#4b5563" stroke="#d1d5db"/>
+<text x="422" y="316" font-size="12" fill="#f9fafb" text-anchor="start">R</text>
+<circle cx="408" cy="340" r="7" fill="#4b5563" stroke="#d1d5db"/>
+<text x="422" y="344" font-size="12" fill="#f9fafb" text-anchor="start">A0</text>
+<circle cx="408" cy="368" r="7" fill="#059669" stroke="#d1d5db"/>
+<text x="422" y="372" font-size="12" fill="#f9fafb" text-anchor="start">A1</text>
+<line x1="408" y1="368" x2="350" y2="368" stroke="#059669" stroke-width="2"/>
+<text x="342" y="373" font-size="14" fill="#059669" text-anchor="end" font-weight="600">Left stick X</text>
+<circle cx="408" cy="396" r="7" fill="#059669" stroke="#d1d5db"/>
+<text x="422" y="400" font-size="12" fill="#f9fafb" text-anchor="start">A2</text>
+<line x1="408" y1="396" x2="350" y2="396" stroke="#059669" stroke-width="2"/>
+<text x="342" y="401" font-size="14" fill="#059669" text-anchor="end" font-weight="600">Left stick Y</text>
+<circle cx="408" cy="424" r="7" fill="#059669" stroke="#d1d5db"/>
+<text x="422" y="428" font-size="12" fill="#f9fafb" text-anchor="start">A3</text>
+<line x1="408" y1="424" x2="350" y2="424" stroke="#059669" stroke-width="2"/>
+<text x="342" y="429" font-size="14" fill="#059669" text-anchor="end" font-weight="600">Right stick X (Z)</text>
+<circle cx="408" cy="452" r="7" fill="#059669" stroke="#d1d5db"/>
+<text x="422" y="456" font-size="12" fill="#f9fafb" text-anchor="start">A4</text>
+<line x1="408" y1="452" x2="350" y2="452" stroke="#059669" stroke-width="2"/>
+<text x="342" y="457" font-size="14" fill="#059669" text-anchor="end" font-weight="600">Right stick Y (Rz)</text>
+<circle cx="408" cy="480" r="7" fill="#4b5563" stroke="#d1d5db"/>
+<text x="422" y="484" font-size="12" fill="#f9fafb" text-anchor="start">A5</text>
+<circle cx="408" cy="508" r="7" fill="#4b5563" stroke="#d1d5db"/>
+<text x="422" y="512" font-size="12" fill="#f9fafb" text-anchor="start">A6</text>
+<circle cx="408" cy="536" r="7" fill="#4b5563" stroke="#d1d5db"/>
+<text x="422" y="540" font-size="12" fill="#f9fafb" text-anchor="start">A7</text>
+<circle cx="408" cy="564" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="422" y="568" font-size="12" fill="#f9fafb" text-anchor="start">B0</text>
+<line x1="408" y1="564" x2="350" y2="564" stroke="#2563eb" stroke-width="2"/>
+<text x="342" y="569" font-size="14" fill="#2563eb" text-anchor="end" font-weight="600">Button 1</text>
+<circle cx="408" cy="592" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="422" y="596" font-size="12" fill="#f9fafb" text-anchor="start">B1</text>
+<line x1="408" y1="592" x2="350" y2="592" stroke="#2563eb" stroke-width="2"/>
+<text x="342" y="597" font-size="14" fill="#2563eb" text-anchor="end" font-weight="600">Button 2</text>
+<circle cx="408" cy="620" r="7" fill="#4b5563" stroke="#d1d5db"/>
+<text x="422" y="624" font-size="12" fill="#f9fafb" text-anchor="start">B2</text>
+<circle cx="408" cy="648" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="422" y="652" font-size="12" fill="#f9fafb" text-anchor="start">B10</text>
+<line x1="408" y1="648" x2="350" y2="648" stroke="#2563eb" stroke-width="2"/>
+<text x="342" y="653" font-size="14" fill="#2563eb" text-anchor="end" font-weight="600">Button 10</text>
+<circle cx="408" cy="676" r="7" fill="#dc2626" stroke="#d1d5db"/>
+<text x="422" y="680" font-size="12" fill="#f9fafb" text-anchor="start">3V3</text>
+<circle cx="408" cy="704" r="7" fill="#111827" stroke="#d1d5db"/>
+<text x="422" y="708" font-size="12" fill="#f9fafb" text-anchor="start">G</text>
+<circle cx="408" cy="732" r="7" fill="#dc2626" stroke="#d1d5db"/>
+<text x="422" y="736" font-size="12" fill="#f9fafb" text-anchor="start">5V</text>
+<circle cx="572" cy="200" r="7" fill="#dc2626" stroke="#d1d5db"/>
+<text x="558" y="204" font-size="12" fill="#f9fafb" text-anchor="end">3V3</text>
+<circle cx="572" cy="228" r="7" fill="#111827" stroke="#d1d5db"/>
+<text x="558" y="232" font-size="12" fill="#f9fafb" text-anchor="end">G</text>
+<circle cx="572" cy="256" r="7" fill="#dc2626" stroke="#d1d5db"/>
+<text x="558" y="260" font-size="12" fill="#f9fafb" text-anchor="end">5V</text>
+<circle cx="572" cy="284" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="288" font-size="12" fill="#f9fafb" text-anchor="end">B9</text>
+<line x1="572" y1="284" x2="630" y2="284" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="289" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 9</text>
+<circle cx="572" cy="312" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="316" font-size="12" fill="#f9fafb" text-anchor="end">B8</text>
+<line x1="572" y1="312" x2="630" y2="312" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="317" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 8</text>
+<circle cx="572" cy="340" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="344" font-size="12" fill="#f9fafb" text-anchor="end">B7</text>
+<line x1="572" y1="340" x2="630" y2="340" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="345" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 7</text>
+<circle cx="572" cy="368" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="372" font-size="12" fill="#f9fafb" text-anchor="end">B6</text>
+<line x1="572" y1="368" x2="630" y2="368" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="373" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 6</text>
+<circle cx="572" cy="396" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="400" font-size="12" fill="#f9fafb" text-anchor="end">B5</text>
+<line x1="572" y1="396" x2="630" y2="396" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="401" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 5</text>
+<circle cx="572" cy="424" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="428" font-size="12" fill="#f9fafb" text-anchor="end">B4</text>
+<line x1="572" y1="424" x2="630" y2="424" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="429" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 4</text>
+<circle cx="572" cy="452" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="456" font-size="12" fill="#f9fafb" text-anchor="end">B3</text>
+<line x1="572" y1="452" x2="630" y2="452" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="457" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 3</text>
+<circle cx="572" cy="480" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="484" font-size="12" fill="#f9fafb" text-anchor="end">A15</text>
+<line x1="572" y1="480" x2="630" y2="480" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="485" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 16</text>
+<circle cx="572" cy="508" r="7" fill="#6b7280" stroke="#d1d5db"/>
+<text x="558" y="512" font-size="12" fill="#f9fafb" text-anchor="end">A12</text>
+<line x1="572" y1="508" x2="630" y2="508" stroke="#6b7280" stroke-width="2"/>
+<text x="638" y="513" font-size="14" fill="#6b7280" text-anchor="start" font-weight="600">USB D+ (on board)</text>
+<circle cx="572" cy="536" r="7" fill="#6b7280" stroke="#d1d5db"/>
+<text x="558" y="540" font-size="12" fill="#f9fafb" text-anchor="end">A11</text>
+<line x1="572" y1="536" x2="630" y2="536" stroke="#6b7280" stroke-width="2"/>
+<text x="638" y="541" font-size="14" fill="#6b7280" text-anchor="start" font-weight="600">USB D− (on board)</text>
+<circle cx="572" cy="564" r="7" fill="#7c3aed" stroke="#d1d5db"/>
+<text x="558" y="568" font-size="12" fill="#f9fafb" text-anchor="end">A10</text>
+<line x1="572" y1="564" x2="630" y2="564" stroke="#7c3aed" stroke-width="2"/>
+<text x="638" y="569" font-size="14" fill="#7c3aed" text-anchor="start" font-weight="600">D-pad down</text>
+<circle cx="572" cy="592" r="7" fill="#7c3aed" stroke="#d1d5db"/>
+<text x="558" y="596" font-size="12" fill="#f9fafb" text-anchor="end">A9</text>
+<line x1="572" y1="592" x2="630" y2="592" stroke="#7c3aed" stroke-width="2"/>
+<text x="638" y="597" font-size="14" fill="#7c3aed" text-anchor="start" font-weight="600">D-pad up</text>
+<circle cx="572" cy="620" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="624" font-size="12" fill="#f9fafb" text-anchor="end">A8</text>
+<line x1="572" y1="620" x2="630" y2="620" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="625" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 15</text>
+<circle cx="572" cy="648" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="652" font-size="12" fill="#f9fafb" text-anchor="end">B15</text>
+<line x1="572" y1="648" x2="630" y2="648" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="653" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 14</text>
+<circle cx="572" cy="676" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="680" font-size="12" fill="#f9fafb" text-anchor="end">B14</text>
+<line x1="572" y1="676" x2="630" y2="676" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="681" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 13</text>
+<circle cx="572" cy="704" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="708" font-size="12" fill="#f9fafb" text-anchor="end">B13</text>
+<line x1="572" y1="704" x2="630" y2="704" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="709" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 12</text>
+<circle cx="572" cy="732" r="7" fill="#2563eb" stroke="#d1d5db"/>
+<text x="558" y="736" font-size="12" fill="#f9fafb" text-anchor="end">B12</text>
+<line x1="572" y1="732" x2="630" y2="732" stroke="#2563eb" stroke-width="2"/>
+<text x="638" y="737" font-size="14" fill="#2563eb" text-anchor="start" font-weight="600">Button 11</text>
+<circle cx="40" cy="850" r="7" fill="#2563eb"/><text x="54" y="855" font-size="14" fill="#111827">Buttons</text>
+<circle cx="168" cy="850" r="7" fill="#7c3aed"/><text x="182" y="855" font-size="14" fill="#111827">D-pad</text>
+<circle cx="296" cy="850" r="7" fill="#059669"/><text x="310" y="855" font-size="14" fill="#111827">Stick (ADC)</text>
+<circle cx="424" cy="850" r="7" fill="#d97706"/><text x="438" y="855" font-size="14" fill="#111827">LED</text>
+<circle cx="552" cy="850" r="7" fill="#6b7280"/><text x="566" y="855" font-size="14" fill="#111827">USB</text>
+<circle cx="680" cy="850" r="7" fill="#dc2626"/><text x="694" y="855" font-size="14" fill="#111827">Power</text>
+<circle cx="808" cy="850" r="7" fill="#111827"/><text x="822" y="855" font-size="14" fill="#111827">Ground</text>
+</svg>
