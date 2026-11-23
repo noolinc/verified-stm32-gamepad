@@ -3,6 +3,13 @@
 Bare-metal firmware for a **USB HID gamepad** on the **STM32F411 "Black Pill"**. It needs no
 driver on macOS, Linux or Windows, has no HAL and no C library, and is about 6 KB of flash.
 
+It is also a working demonstration of **[Nool](https://nool.dev)**, a software assurance
+substrate. In this repository the specifications are not documents next to the code. The
+TLA+ models, the MISRA-style coding rules, the MCU's datasheet limits and the commit
+conventions are **executable gates**. Every change has to pass them to enter the history.
+[See how it works](#built-on-nool-the-specification-is-the-enforcement-layer), with real
+refusals.
+
 The firmware logic is checked in four independent ways before it reaches a board:
 
 1. Unit tests and property-based tests on the host.
@@ -22,6 +29,7 @@ The firmware logic is checked in four independent ways before it reaches a board
 
 ## Contents
 
+- [Built on Nool: the specification is the enforcement layer](#built-on-nool-the-specification-is-the-enforcement-layer)
 - [What you need](#what-you-need)
 - [Wiring](#wiring)
 - [Build and flash](#build-and-flash)
@@ -35,6 +43,146 @@ The firmware logic is checked in four independent ways before it reaches a board
 - [Repository layout](#repository-layout)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Built on Nool: the specification is the enforcement layer
+
+Embedded teams already write specifications: a state-machine model, a coding standard, a
+memory budget taken from the datasheet, a review checklist. The problem is that they are
+*advisory*. They live in a wiki or a PDF and are checked by people when someone remembers.
+Code drifts from them one commit at a time.
+
+**[Nool](https://nool.dev)** changes where specifications live. Nool is version control built
+as a software assurance substrate. A change does not enter the history because someone typed
+`commit`. It enters by being *proposed* and passing every gate the repository declares. Each
+specification is compiled into one of those gates, so the specification **is** the
+enforcement layer, not documentation of it.
+
+```mermaid
+flowchart LR
+    DEV["Engineer or AI agent<br/>proposes a change"] --> P1
+    subgraph NOOL["Nool landing path (fail-closed)"]
+        P1["Policy gate (Aram, WASM sandbox)<br/>MISRA/BARR-C subset · resource bounds<br/>hardware fit · commit rules"]
+        P2["Isolated ghost run on HEAD + change<br/>unit + property tests · TLC model checking<br/>cross build + budget · simulator tests<br/>Docker emulation with the Linux USB stack"]
+        P3["Seal<br/>commit template · Why/Test-Note trailers"]
+        P1 --> P2 --> P3
+    end
+    P3 --> KNOT["Knot in the history<br/>with attestations and evidence"]
+    P1 -. refused .-> FIND["Recorded as a finding,<br/>recalled to the next author"]
+    P2 -. refused .-> FIND
+```
+
+### From specification to gate
+
+| Specification | Made executable as | Enforced by Nool at |
+|---|---|---|
+| **TLA+ models**: `specs/Debounce.tla` (glitches never register; stable input always does) and `specs/UsbHid.tla` (every state change eventually reaches a host that resets, reopens and drops reports) | TLC explores every interleaving. Seeded-bug configurations **must fail**, which shows the properties can catch a bug. A guard checks that the model's constants equal the C constants. | `tla-model-check` gate on every landing |
+| **The same properties, applied to the real C code** | Property-based tests (`tests/pbt_*.c`) check the model's invariants on the shipped functions, with shrinking counterexamples | `host-tests` gate |
+| **The model's scenarios on real firmware** | The Docker emulation replays them (glitch, reset with a held button) on the real `.elf` against the Linux kernel's HID stack | `docker-usbip-e2e` gate |
+| **Coding standard**: MISRA C:2012 / BARR-C:2018 / Power of 10 subset | `emb_c_subset` and `emb_resource_bounds` policies, compiled to WebAssembly | Aram policy gate, before anything is built |
+| **Datasheet limits**: 512 KB flash, 128 KB RAM, single-precision FPU, no heap (`policy/hardware-profile.toml`) | `emb_hardware_fit` policy plus a size budget on the linked `.elf` | Aram policy gate + `firmware-build` gate |
+| **Change discipline**: every change says what it is, why, and how it was tested | Commit template + `gp_commit_msg` policy | Seal and push |
+
+The gates are declared once in `nool.toml` (`[[reification.checks]]`, mode `block`) and the
+policies are pinned by hash in `policies/`. They apply to every author equally: a human, a
+script or an AI agent.
+
+### Watch it refuse
+
+These three changes are realistic regressions. Each one was proposed to a copy of this
+repository, and Nool refused all three. The output below is real and trimmed.
+
+**1. "Model SET_IDLE 0 as send-on-change only": the formal model is weakened.** Someone
+edits `specs/UsbHid.cfg` to turn off the keepalive, so the model matches a literal reading
+of the HID specification. TLC finds a behaviour where the host never learns the device's
+state, and the landing is refused with the counterexample.
+
+```text
+$ tools/propose.sh --type feature --scope tla --title "model SET_IDLE 0 as send-on-change only" … -- specs/UsbHid.cfg
+  [Lint] ❌ Speculative Abort: lint check 'tla-model-check' failed:
+PASS Debounce (126 distinct states)
+FAIL UsbHid
+Error: Temporal properties were violated.
+Error: The following behavior constitutes a counter-example:
+State 1: <Initial predicate>
+State 2: <InputChange line 47 of module UsbHid>
+State 3: <InputChange line 47 of module UsbHid>
+State 4: <BusReset line 55 of module UsbHid>
+…
+  ✓ Released the lease this propose filed: no candidate was queued.
+Error: Lint check 'tla-model-check' failed ([[reification.checks]], mode = "block")
+```
+
+The same gate also keeps the model and the code in step. If `GP_DEBOUNCE_MS` in C stops
+matching `Window` in `specs/Debounce.cfg`, `tools/check-tla.sh` fails with
+`FAIL Debounce.cfg Window=5 but GP_DEBOUNCE_MS=3`.
+
+**2. "Honour SET_IDLE 0 strictly": a plausible reading of the HID spec reintroduces a real
+bug.** This is the bug the Docker emulation originally found and `UsbHidNoKeepalive.cfg`
+models. The property derived from the model catches it and shrinks it to a minimal trace.
+
+```text
+$ tools/propose.sh --type feature --title "honour SET_IDLE 0 strictly" … -- core/gp_report.c
+  [Lint] ❌ Speculative Abort: lint check 'host-tests' failed:
+FALSIFIED tx_scheduler after 277 case(s)
+  shrunk:   silent for 51 ms with the endpoint free (period 50) at step 62
+  replay:   PBT_SEED=1785552897 PBT_RUNS=1 (property tx_scheduler)
+test_report.c:55: CHECK_EQ failed: sent == 1000 / GP_TX_KEEPALIVE_MS (0 vs 20)
+```
+
+**3. "Single exit point": the coding standard is enforced before anything is built.**
+
+```text
+$ tools/propose.sh --type feature --title "single exit in gp_tx_step" … -- core/gp_report.c
+Error: Gate stack denied [POLICY_DENY] at stage pre-propose:
+  [EMB-C-001] core/gp_report.c:94: goto (goto shall not be used)
+  -- MISRA C:2012 Rule 15.1; BARR-C:2018 1.7c; Power of 10 Rule 1
+  deviate: /* EMB-DEVIATION(EMB-C-001): <reason> */ on or above the line
+```
+
+The policy also shows the **sanctioned way out**. A justified deviation comment is the only
+way past a rule, and it stays in the code where reviewers and auditors can see it.
+
+### Evidence, not trust
+
+Every change that does land carries a record of what was checked. For example, the
+emulator fix in this repository:
+
+```text
+$ nool evidence knot bfc9ff18
+  Intent      : bug(emu): Docker sim exits 139 after all checks pass
+  Policy Results (7):
+    • policy emb_c_subset: allow [351da1a509b7]
+    • policy emb_hardware_fit: allow [94c6de8ee0ed]
+    • policy emb_resource_bounds: allow [da5bbe3f561c]
+    • policy gp_commit_msg: allow [f4c3ded057da]
+    • authority: local backend, lease 902072fd9551 seq 52 confirmed
+  Attestations (4):
+    • compile: pass by integrity-driver
+    • lint: pass by docker-usbip-e2e
+    • declared-scope: pass by lease
+```
+
+Evidence can be exported (`nool evidence export`) and checked offline as DSSE / in-toto /
+SLSA bundles (`nool verify-bundle`). That is the material a functional-safety or
+supply-chain audit asks for.
+
+### Why it matters with AI agents
+
+Much of this repository was written with AI coding agents. Agents produce code quickly, so the
+question becomes what stops them landing code that is plausible but wrong. With Nool the
+answer is the same specifications a careful engineer would check by hand, applied
+automatically and without exception:
+
+- **Refusals become memory.** A refused attempt is stored as a finding and shown to the next
+  agent or engineer who touches those files, so the same mistake is not proposed twice.
+- **Agents coordinate through leases.** Agents announce what they are changing and take
+  leases, so parallel work does not collide.
+- **Fleets are planned up front.** `nool fleet plan` splits work into waves of tasks that
+  touch disjoint files; see the [roadmap](#roadmap-125-µs-latency-planned-as-a-parallel-fleet).
+
+You do not need Nool to build, test or flash this project; `tools/check-all.sh` runs the
+same checks by hand. Nool is what makes them **non-optional**. Learn more at
+**[nool.dev](https://nool.dev)**.
 
 ## What you need
 
@@ -285,7 +433,8 @@ you edit it:
 - **Fit:** the image must stay within the flash/RAM budget for the STM32F411CEU6
   (`policy/hardware-profile.toml`).
 
-The maintainers' tooling checks these rules automatically; see [Contributing](#contributing).
+Nool enforces these rules on every change through the `emb_c_subset`, `emb_resource_bounds`
+and `emb_hardware_fit` policies; see [Watch it refuse](#watch-it-refuse).
 `tests/` is exempt.
 
 ## Roadmap: 125 µs latency, planned as a parallel fleet
@@ -386,12 +535,12 @@ tools/               check-all, flash, TLC runner, size budget, simulator bundli
 You need nothing beyond the tools above to build, test or flash: **run
 `tools/check-all.sh`, then open a pull request.**
 
-**About Nool.** The maintainers manage this repository with **Nool**, a version-control
-layer on top of git. Every change is "landed" through a gate that re-runs the checks in
-`tools/check-all.sh`, plus the [coding rules](#coding-rules), which run as WebAssembly
-policy plugins (`policies/`, configured in `nool.toml`). A change that fails any check is
-refused. GitHub shows the result as ordinary git commits. The `refs/nool/*` refs, `nool.toml`,
-`policies/` and `compile_commands.json` exist for that tooling; you can ignore them.
+**About Nool.** This repository is managed with [Nool](https://nool.dev); see
+[Built on Nool](#built-on-nool-the-specification-is-the-enforcement-layer). When a maintainer
+lands your pull request, Nool re-runs every check in `tools/check-all.sh` and the coding-rule
+policies. A change that fails any of them cannot land. GitHub shows the result as ordinary
+git commits. The `refs/nool/*` refs, `nool.toml`, `policies/` and `compile_commands.json`
+exist for Nool; you can ignore them.
 
 **Commit messages** follow a template, which the tooling enforces:
 
