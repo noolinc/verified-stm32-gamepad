@@ -92,7 +92,7 @@ hash = "da5bbe3f561cb8311c60bdd39e4ba7fffa7cc2d49ddbef096baf6f3730032cca"
 
 [[aram.policies]]
 name = "gp_commit_msg.wasm"
-hash = "9ba6d9f7320db1fba3533448bf799417d04b29ff183751819a055de619b89d71"
+hash = "f4c3ded057dac66afea458a279ecd7d4161ef7a097a37d768342dd8e4472ea8f"
 
 [bridge]
 git_mirror_path = ".nool/git_mirror/"
