@@ -1,0 +1,9 @@
+name = "emb_c_subset"
+version = "0.1.0"
+plugin_type = "Policy"
+wasm_path = "emb_c_subset.wasm"
+wasm_hash = "351da1a509b766239c078b985ece5c0a3b1508ba495c9e4457ae6a013a4d7e92"
+capabilities = []
+requires = []
+signature = "b2ab0d4dd73327c20f4a09fcd89a9f3f292a7924d9f852281a649ce3e58f0ebe90d6db71bf14d896c529c3fa36443c21eb1c07bfbe5d02be40934de63c206c04"
+public_key = "39aa3ee8852f14d9edd9c286ce0a6ea6d507ae1b5c8f56bb9ff31b560544af4d"
