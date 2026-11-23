@@ -1,0 +1,31 @@
+# Hardware and safety profile for the STM32F411 Black Pill USB gamepad.
+# Compiled into the EmbeddedPolicyPack policies by tools/build-policies.sh.
+# After editing: rebuild, reinstall and re-pin the policies.
+
+[hardware]
+name = "stm32f411ceu6"
+arch = "armv7e-m"
+ram_bytes = 131072
+flash_bytes = 524288
+fpu = "single"
+
+[architecture]
+execution_model = "superloop"
+heap = "none"
+max_stack_object_bytes = 0
+max_function_lines = 60
+
+[safety]
+iso26262_asil = "QM"
+iec62304_class = "none"
+iec61508_sil = 0
+
+[language]
+c_standard = "c11"
+headers = "c"
+
+[budget]
+flash_warn_percent = 85
+flash_max_percent = 95
+ram_warn_percent = 85
+ram_max_percent = 95

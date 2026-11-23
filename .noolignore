@@ -6,3 +6,5 @@
 .nool/nool.db-journal
 .nool/knots/
 nool_proposal.tmp
+build/
+.build/
