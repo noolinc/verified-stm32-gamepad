@@ -33,3 +33,4 @@ build/
 policy-src/*/target/
 policy-src/*/*.wasm
 specs/states/
+.swiftpm/
