@@ -8,3 +8,4 @@
 nool_proposal.tmp
 build/
 .build/
+policy-src/*/target/

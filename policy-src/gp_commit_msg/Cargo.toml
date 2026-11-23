@@ -1,0 +1,19 @@
+[package]
+name = "gp_commit_msg"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+nool-aram-policy-sdk = { path = "/Users/arunbalakrishnan/.nool/sdk/nool-aram-policy-sdk" }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+
+[workspace]

@@ -1,0 +1,7 @@
+name = "gp_commit_msg"
+version = "0.1.0"
+plugin_type = "Policy"
+wasm_path = "gp_commit_msg.wasm"
+wasm_hash = ""
+capabilities = []
+requires = []

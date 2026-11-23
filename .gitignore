@@ -30,3 +30,5 @@ build/
 *.elf
 *.bin
 *.map
+policy-src/*/target/
+policy-src/*/*.wasm
