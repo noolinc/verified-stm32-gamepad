@@ -1,0 +1,238 @@
+[
+ {
+  "directory": ".",
+  "file": "core/gp_input.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-c",
+   "core/gp_input.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "core/gp_report.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-c",
+   "core/gp_report.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "core/usb_ctrl.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-c",
+   "core/usb_ctrl.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "core/usb_desc.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-c",
+   "core/usb_desc.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "tests/pbt_input.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-Itests",
+   "-c",
+   "tests/pbt_input.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "tests/pbt_report.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-Itests",
+   "-c",
+   "tests/pbt_report.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "tests/pbt_usb_ctrl.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-Itests",
+   "-c",
+   "tests/pbt_usb_ctrl.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "tests/test_descriptor.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-Itests",
+   "-c",
+   "tests/test_descriptor.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "tests/test_input.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-Itests",
+   "-c",
+   "tests/test_input.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "tests/test_report.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-Itests",
+   "-c",
+   "tests/test_report.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "tests/test_usb_ctrl.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-Itests",
+   "-c",
+   "tests/test_usb_ctrl.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "tests/usb_fake.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "-Icore",
+   "-Itests",
+   "-c",
+   "tests/usb_fake.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "firmware/stm32f411/board.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "--target=arm-none-eabi",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-ffreestanding",
+   "-Icore",
+   "-Ifirmware/stm32f411",
+   "-c",
+   "firmware/stm32f411/board.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "firmware/stm32f411/clock.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "--target=arm-none-eabi",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-ffreestanding",
+   "-Icore",
+   "-Ifirmware/stm32f411",
+   "-c",
+   "firmware/stm32f411/clock.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "firmware/stm32f411/main.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "--target=arm-none-eabi",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-ffreestanding",
+   "-Icore",
+   "-Ifirmware/stm32f411",
+   "-c",
+   "firmware/stm32f411/main.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "firmware/stm32f411/mem.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "--target=arm-none-eabi",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-ffreestanding",
+   "-Icore",
+   "-Ifirmware/stm32f411",
+   "-c",
+   "firmware/stm32f411/mem.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "firmware/stm32f411/startup.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "--target=arm-none-eabi",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-ffreestanding",
+   "-Icore",
+   "-Ifirmware/stm32f411",
+   "-c",
+   "firmware/stm32f411/startup.c"
+  ]
+ },
+ {
+  "directory": ".",
+  "file": "firmware/stm32f411/usb_otg_fs.c",
+  "arguments": [
+   "cc",
+   "-std=c11",
+   "--target=arm-none-eabi",
+   "-mcpu=cortex-m4",
+   "-mthumb",
+   "-ffreestanding",
+   "-Icore",
+   "-Ifirmware/stm32f411",
+   "-c",
+   "firmware/stm32f411/usb_otg_fs.c"
+  ]
+ }
+]

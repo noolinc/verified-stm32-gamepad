@@ -1,0 +1,104 @@
+/*
+ * regs.h - the STM32F411 registers this firmware uses (RM0383).
+ * Hand-written instead of CMSIS so every line is covered by the policies.
+ */
+#ifndef REGS_H
+#define REGS_H
+
+#include <stdint.h>
+
+#define REG32(addr) (*(volatile uint32_t *)(addr))
+
+/* RCC */
+#define RCC_BASE 0x40023800UL
+#define RCC_CR REG32(RCC_BASE + 0x00UL)
+#define RCC_PLLCFGR REG32(RCC_BASE + 0x04UL)
+#define RCC_CFGR REG32(RCC_BASE + 0x08UL)
+#define RCC_AHB1ENR REG32(RCC_BASE + 0x30UL)
+#define RCC_AHB2ENR REG32(RCC_BASE + 0x34UL)
+#define RCC_APB1ENR REG32(RCC_BASE + 0x40UL)
+#define RCC_APB2ENR REG32(RCC_BASE + 0x44UL)
+
+/* PWR, FLASH */
+#define PWR_CR REG32(0x40007000UL)
+#define FLASH_ACR REG32(0x40023C00UL)
+
+/* GPIO */
+#define GPIOA_BASE 0x40020000UL
+#define GPIOB_BASE 0x40020400UL
+#define GPIOC_BASE 0x40020800UL
+#define GPIO_MODER(b) REG32((b) + 0x00UL)
+#define GPIO_OSPEEDR(b) REG32((b) + 0x08UL)
+#define GPIO_PUPDR(b) REG32((b) + 0x0CUL)
+#define GPIO_IDR(b) REG32((b) + 0x10UL)
+#define GPIO_BSRR(b) REG32((b) + 0x18UL)
+#define GPIO_AFRH(b) REG32((b) + 0x24UL)
+
+/* ADC1 */
+#define ADC1_BASE 0x40012000UL
+#define ADC1_SR REG32(ADC1_BASE + 0x00UL)
+#define ADC1_CR2 REG32(ADC1_BASE + 0x08UL)
+#define ADC1_SMPR2 REG32(ADC1_BASE + 0x10UL)
+#define ADC1_SQR1 REG32(ADC1_BASE + 0x2CUL)
+#define ADC1_SQR3 REG32(ADC1_BASE + 0x34UL)
+#define ADC1_DR REG32(ADC1_BASE + 0x4CUL)
+#define ADC_CCR REG32(0x40012304UL)
+
+/* Cortex-M4 core */
+#define SYST_CSR REG32(0xE000E010UL)
+#define SYST_RVR REG32(0xE000E014UL)
+#define SYST_CVR REG32(0xE000E018UL)
+#define SCB_CPACR REG32(0xE000ED88UL)
+
+/* Device unique ID (96 bits) */
+#define UID_BASE 0x1FFF7A10UL
+
+/* USB OTG FS */
+#define OTG_BASE 0x50000000UL
+#define OTG_GAHBCFG REG32(OTG_BASE + 0x008UL)
+#define OTG_GUSBCFG REG32(OTG_BASE + 0x00CUL)
+#define OTG_GRSTCTL REG32(OTG_BASE + 0x010UL)
+#define OTG_GINTSTS REG32(OTG_BASE + 0x014UL)
+#define OTG_GINTMSK REG32(OTG_BASE + 0x018UL)
+#define OTG_GRXSTSP REG32(OTG_BASE + 0x020UL)
+#define OTG_GRXFSIZ REG32(OTG_BASE + 0x024UL)
+#define OTG_DIEPTXF0 REG32(OTG_BASE + 0x028UL)
+#define OTG_GCCFG REG32(OTG_BASE + 0x038UL)
+#define OTG_DIEPTXF1 REG32(OTG_BASE + 0x104UL)
+#define OTG_DCFG REG32(OTG_BASE + 0x800UL)
+#define OTG_DCTL REG32(OTG_BASE + 0x804UL)
+#define OTG_DIEPMSK REG32(OTG_BASE + 0x810UL)
+#define OTG_DOEPMSK REG32(OTG_BASE + 0x814UL)
+#define OTG_DAINT REG32(OTG_BASE + 0x818UL)
+#define OTG_DAINTMSK REG32(OTG_BASE + 0x81CUL)
+#define OTG_DIEPCTL(n) REG32(OTG_BASE + 0x900UL + (0x20UL * (n)))
+#define OTG_DIEPINT(n) REG32(OTG_BASE + 0x908UL + (0x20UL * (n)))
+#define OTG_DIEPTSIZ(n) REG32(OTG_BASE + 0x910UL + (0x20UL * (n)))
+#define OTG_DTXFSTS(n) REG32(OTG_BASE + 0x918UL + (0x20UL * (n)))
+#define OTG_DOEPCTL(n) REG32(OTG_BASE + 0xB00UL + (0x20UL * (n)))
+#define OTG_DOEPINT(n) REG32(OTG_BASE + 0xB08UL + (0x20UL * (n)))
+#define OTG_DOEPTSIZ(n) REG32(OTG_BASE + 0xB10UL + (0x20UL * (n)))
+#define OTG_PCGCCTL REG32(OTG_BASE + 0xE00UL)
+#define OTG_FIFO(n) REG32(OTG_BASE + 0x1000UL + (0x1000UL * (n)))
+
+/* OTG bit fields */
+#define GINT_RXFLVL (1UL << 4U)
+#define GINT_USBRST (1UL << 12U)
+#define GINT_ENUMDNE (1UL << 13U)
+#define GINT_IEPINT (1UL << 18U)
+#define GINT_OEPINT (1UL << 19U)
+#define EP_ENA (1UL << 31U)
+#define EP_DIS (1UL << 30U)
+#define EP_SD0PID (1UL << 28U)
+#define EP_SNAK (1UL << 27U)
+#define EP_CNAK (1UL << 26U)
+#define EP_STALL (1UL << 21U)
+#define EP_USBAEP (1UL << 15U)
+#define EPINT_XFRC (1UL << 0U)
+#define EPINT_STUP (1UL << 3U)
+#define GRST_CSRST (1UL << 0U)
+#define GRST_RXFFLSH (1UL << 4U)
+#define GRST_TXFFLSH (1UL << 5U)
+#define GRST_AHBIDL (1UL << 31U)
+
+#endif /* REGS_H */
