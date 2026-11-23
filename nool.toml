@@ -143,6 +143,25 @@ verdict_reverify_percent = 5
 mutation_budget_secs = 300
 max_mutants = 3
 
+# ---- Gamepad validation gates (block a proposal on failure) ----
+[[reification.checks]]
+name = "host-tests"
+# Unit tests + property-based tests (tests/pbt_*), clean build every time.
+command = ["sh", "-c", "cmake -S . -B build/gate -G 'Unix Makefiles' >/dev/null && cmake --build build/gate --clean-first -j >/dev/null && ctest --test-dir build/gate --output-on-failure --no-tests=error"]
+pass_files = false
+mode = "block"
+timeout_secs = 300
+extensions = ["c", "h", "txt", "cmake"]
+
+[[reification.checks]]
+name = "tla-model-check"
+# TLC on specs/*.tla; seeded-bug configs must fail; model window == GP_DEBOUNCE_MS.
+command = ["tools/check-tla.sh"]
+pass_files = false
+mode = "block"
+timeout_secs = 600
+extensions = ["tla", "cfg", "h"]
+
 [reification.dependencies]
 proto = [
     "ts",
