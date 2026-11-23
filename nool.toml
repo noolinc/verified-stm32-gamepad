@@ -180,6 +180,16 @@ mode = "block"
 timeout_secs = 600
 extensions = ["swift", "c", "h"]
 
+[[reification.checks]]
+name = "docker-usbip-e2e"
+# Real gamepad.elf on the emulated STM32F411, enumerated by Linux over USB/IP
+# (tools/docker-sim.sh). Needs Docker with vhci_hcd (Docker Desktop has it).
+command = ["tools/docker-sim.sh"]
+pass_files = false
+mode = "block"
+timeout_secs = 1200
+extensions = ["c", "h", "ld", "py", "cmake"]
+
 [reification.dependencies]
 proto = [
     "ts",
