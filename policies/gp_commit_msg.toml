@@ -1,0 +1,9 @@
+name = "gp_commit_msg"
+version = "0.1.0"
+plugin_type = "Policy"
+wasm_path = "gp_commit_msg.wasm"
+wasm_hash = "9ba6d9f7320db1fba3533448bf799417d04b29ff183751819a055de619b89d71"
+capabilities = []
+requires = []
+signature = "c2c9edfa79303441e0701100640853fd248edd92dbfe52e6b26058b583f04cbb6d93501c5a15fa0b34f8e11835ee55732e351236348573d98d21940abc60a700"
+public_key = "39aa3ee8852f14d9edd9c286ce0a6ea6d507ae1b5c8f56bb9ff31b560544af4d"

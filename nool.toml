@@ -90,6 +90,10 @@ hash = "94c6de8ee0edf043b121aad495c0b2d112a3202e859a2c497f3a785b217b97d4"
 name = "emb_resource_bounds.wasm"
 hash = "da5bbe3f561cb8311c60bdd39e4ba7fffa7cc2d49ddbef096baf6f3730032cca"
 
+[[aram.policies]]
+name = "gp_commit_msg.wasm"
+hash = "9ba6d9f7320db1fba3533448bf799417d04b29ff183751819a055de619b89d71"
+
 [bridge]
 git_mirror_path = ".nool/git_mirror/"
 sync_on_solidify = true
