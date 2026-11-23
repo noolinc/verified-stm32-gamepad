@@ -532,8 +532,12 @@ tools/               check-all, flash, TLC runner, size budget, simulator bundli
 
 ## Contributing
 
-You need nothing beyond the tools above to build, test or flash: **run
-`tools/check-all.sh`, then open a pull request.**
+See **[CONTRIBUTING.md](CONTRIBUTING.md)**. In short, there are two routes:
+
+- **Pull request.** You need nothing beyond the tools above: run `tools/check-all.sh`, then
+  open a pull request.
+- **Work with Nool directly.** To get the full gate stack, evidence and agent tooling in your
+  own clone, **request a Nool Enterprise licence at [nool.dev](https://nool.dev)**.
 
 **About Nool.** This repository is managed with [Nool](https://nool.dev); see
 [Built on Nool](#built-on-nool-the-specification-is-the-enforcement-layer). When a maintainer
