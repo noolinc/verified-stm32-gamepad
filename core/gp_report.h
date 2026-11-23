@@ -23,6 +23,13 @@
 #define GP_HAT_NULL 8U
 #define GP_AXIS_MAX 127
 
+/* Keepalive: the unchanged state is re-sent at least this often, even when
+ * the host asked for SET_IDLE 0. Linux discards reports for ~50 ms after an
+ * application opens the device (usbhid HID_RESUME_RUNNING); without a
+ * keepalive a state queued before the open is lost until it changes.
+ * Found by the Docker USB/IP simulation; see specs/UsbHid.tla (Keepalive). */
+#define GP_TX_KEEPALIVE_MS 50U
+
 typedef struct
 {
     uint16_t buttons;
@@ -49,8 +56,9 @@ void gp_tx_init(gp_tx_t *tx);
 
 /*
  * Call once per millisecond. Returns true and fills `out` when a report
- * must be sent: the payload changed, or the HID idle period expired
- * (idle_4ms is the SET_IDLE rate in 4 ms units, 0 = only on change).
+ * must be sent: the payload changed, or the repeat period expired. The
+ * repeat period is the SET_IDLE rate (idle_4ms, in 4 ms units) capped at
+ * GP_TX_KEEPALIVE_MS; idle 0 means "keepalive only".
  * When ep_ready is false nothing is consumed and false is returned.
  */
 bool gp_tx_step(gp_tx_t *tx, const gp_state_t *state, uint8_t idle_4ms, bool ep_ready,

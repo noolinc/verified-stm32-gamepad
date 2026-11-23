@@ -200,7 +200,7 @@ struct ReportView: View {
                     .frame(minWidth: 50).padding(4).background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
                 }
             }
-            Text("\(model.reportsSent) reports sent · \(model.reportsPerSecond)/s (sent on change, idle rate 0)")
+            Text("\(model.reportsSent) reports sent · \(model.reportsPerSecond)/s (on change + 50 ms keepalive)")
                 .font(.callout).foregroundStyle(.secondary)
             Text("Decoded with the report descriptor").font(.headline)
             Table(model.layout.decode(model.report).map(DecodedRow.init)) {

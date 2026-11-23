@@ -53,29 +53,40 @@ static bool prop_descriptor_agrees(pbt_t *p)
     return true;
 }
 
-/* Scheduler: no change is lost, sequence numbers count sends, no spurious sends. */
+/* Scheduler: no change is lost, sequence numbers count sends, an unchanged
+ * state is repeated only after the repeat period (host idle rate capped at
+ * GP_TX_KEEPALIVE_MS), and never stays silent longer than that while the
+ * endpoint is free. */
 static bool prop_scheduler(pbt_t *p)
 {
     gp_tx_t tx; gp_state_t s = { 0u, GP_HAT_NULL, { 0, 0, 0, 0 } };
     uint8_t out[GP_REPORT_SIZE], last[GP_REPORT_SIZE] = { 0 };
-    uint32_t sends = 0, steps = pbt_draw(p, 200u);
-    uint8_t idle = (uint8_t)pbt_draw(p, 4u);
+    uint32_t sends = 0, steps = pbt_draw(p, 400u), since = 0;
+    uint8_t idle = (uint8_t)pbt_draw(p, 20u);
+    /* per-case regimes: input changes every ~1..256 ms, host busy 0..75% */
+    uint32_t change_mod = 1u << pbt_draw(p, 8u);
+    uint32_t busy_mod = 1u + pbt_draw(p, 3u);
+    uint32_t period = (idle != 0u && idle * 4u < GP_TX_KEEPALIVE_MS) ? idle * 4u : GP_TX_KEEPALIVE_MS;
     bool have = false;
     gp_tx_init(&tx);
+    pbt_note(p, "idle=%u change=1/%u busy=1/%u ", idle, change_mod, busy_mod);
     for (uint32_t t = 0; t < steps; t++) {
-        if (pbt_draw(p, 3u) == 0u) { gen_state(p, &s); }
-        bool ready = pbt_bool(p);
+        if (pbt_draw(p, change_mod - 1u) == 0u) { gen_state(p, &s); }
+        bool ready = pbt_draw(p, busy_mod) != 0u;
+        since++;
         bool sent = gp_tx_step(&tx, &s, idle, ready, out);
         uint8_t now[GP_REPORT_SIZE]; gp_report_build(&s, 0u, now);
         if (sent && !ready) return pbt_fail(p, "sent while endpoint busy at step %u", t);
         if (sent) {
             if (out[7] != (uint8_t)sends) return pbt_fail(p, "seq %u, expected %u", out[7], sends);
-            if (idle == 0u && have && memcmp(out, last, GP_REPORT_PAYLOAD) == 0)
-                return pbt_fail(p, "duplicate report with idle 0 at step %u", t);
-            memcpy(last, out, sizeof last); have = true; sends++;
+            if (have && memcmp(out, last, GP_REPORT_PAYLOAD) == 0 && since < period)
+                return pbt_fail(p, "repeat after %u ms, period %u, at step %u", since, period, t);
+            memcpy(last, out, sizeof last); have = true; sends++; since = 0;
         }
         if (ready && (!have || memcmp(last, now, GP_REPORT_PAYLOAD) != 0))
             return pbt_fail(p, "state change not delivered at step %u", t);
+        if (ready && since > period)
+            return pbt_fail(p, "silent for %u ms with the endpoint free (period %u) at step %u", since, period, t);
     }
     return true;
 }

@@ -2,110 +2,133 @@
 (***************************************************************************)
 (* Device side of the gamepad's USB link: core/usb_ctrl.c (device state, *)
 (* SET_ADDRESS, SET_CONFIGURATION, bus reset), the EP1 IN interrupt       *)
-(* endpoint, and the report scheduler gp_tx_step() in core/gp_report.c    *)
-(* with idle rate 0 (send on change only). The host enumerates, may reset *)
-(* or deconfigure, and polls EP1. Inputs change a bounded number of times *)
-(* so every behaviour eventually goes quiet and liveness is checkable.    *)
+(* endpoint and the report scheduler gp_tx_step() in core/gp_report.c     *)
+(* with idle rate 0. The host enumerates, may reset or deconfigure, and   *)
+(* polls EP1 only while an application has the device open.               *)
+(*                                                                         *)
+(* Host behaviour found by the Docker USB/IP simulation (Linux usbhid):    *)
+(* for ~50 ms after an open, reports that arrive are DISCARDED             *)
+(* (HID_RESUME_RUNNING), and applications may open and close the device   *)
+(* at any time. The firmware therefore never stays silent: besides        *)
+(* sending on change it re-sends the current state every 50 ms             *)
+(* (Keepalive). With Keepalive = FALSE (pure SET_IDLE 0 behaviour) TLC     *)
+(* finds the lost-held-state behaviour (UsbHidNoKeepalive.cfg).            *)
 (***************************************************************************)
 EXTENDS Naturals
 
-CONSTANTS Values,      \* possible input states (abstracted report payloads)
-          MaxChanges,  \* bound on input changes
-          MaxResets,   \* bound on bus resets / deconfigurations
-          ReinitScheduler \* firmware calls gp_tx_init() on reset/configure
+CONSTANTS Values,          \* abstracted report payloads
+          MaxChanges,      \* bound on input changes
+          MaxResets,       \* bound on bus resets / deconfigurations
+          MaxCloses,       \* bound on applications closing the device
+          ReinitScheduler, \* firmware calls gp_tx_init() on reset/configure
+          Keepalive        \* firmware re-sends unchanged state periodically
 
 None == "none"
 
+VARIABLES dev, addr, cur,
+          lastSent,        \* gp_tx_t.last, None after (re)init
+          inflight,        \* report in the EP1 FIFO, or None
+          hostSeen,        \* last report the host's HID layer accepted
+          polling,         \* host has the interrupt pipe open
+          dropping,        \* host is inside its post-open discard window
+          changes, resets, closes
 
-VARIABLES dev,       \* "Default" | "Address" | "Configured"
-          addr,      \* assigned address (0 or 1 abstracted)
-          cur,       \* current input state on the device
-          lastSent,  \* gp_tx_t.last: last report queued, or None after (re)init
-          inflight,  \* report sitting in the EP1 IN FIFO, or None
-          hostSeen,  \* last report the host received, or None
-          changes, resets
+vars == <<dev, addr, cur, lastSent, inflight, hostSeen, polling, dropping,
+          changes, resets, closes>>
 
-vars == <<dev, addr, cur, lastSent, inflight, hostSeen, changes, resets>>
-
-(* The scheduler record after a reset or (re)configuration. *)
 Fresh == IF ReinitScheduler THEN None ELSE lastSent
 
-Init == /\ dev = "Default" /\ addr = 0
-        /\ cur \in Values
-        /\ lastSent = None /\ inflight = None /\ hostSeen = None
-        /\ changes = 0 /\ resets = 0
+Init == /\ dev = "Default" /\ addr = 0 /\ cur \in Values
+        /\ lastSent = None /\ inflight = None
+        /\ hostSeen = None /\ polling = FALSE /\ dropping = FALSE
+        /\ changes = 0 /\ resets = 0 /\ closes = 0
 
 (* ---- environment ---- *)
 InputChange == /\ changes < MaxChanges
                /\ \E v \in Values \ {cur} : cur' = v
                /\ changes' = changes + 1
-               /\ UNCHANGED <<dev, addr, lastSent, inflight, hostSeen, resets>>
+               /\ UNCHANGED <<dev, addr, lastSent, inflight, hostSeen,
+                              polling, dropping, resets, closes>>
 
-(* Bus reset: usb_ctrl_bus_reset() + driver flushes EP1 + gp_tx_init(). *)
+(* Bus reset: usb_ctrl_bus_reset(), EP1 flushed, gp_tx_init(); the host
+   re-enumerates, so its pipes are closed and its state is gone. *)
 BusReset == /\ resets < MaxResets
             /\ dev' = "Default" /\ addr' = 0
-            /\ lastSent' = Fresh /\ inflight' = None /\ hostSeen' = None
+            /\ lastSent' = Fresh /\ inflight' = None
+            /\ hostSeen' = None /\ polling' = FALSE /\ dropping' = FALSE
             /\ resets' = resets + 1
-            /\ UNCHANGED <<cur, changes>>
+            /\ UNCHANGED <<cur, changes, closes>>
 
-(* Host deconfigures (SET_CONFIGURATION 0): EP1 closed and flushed. *)
 Deconfigure == /\ dev = "Configured" /\ resets < MaxResets
-               /\ dev' = "Address" /\ inflight' = None /\ lastSent' = Fresh
+               /\ dev' = "Address" /\ inflight' = None
+               /\ lastSent' = Fresh /\ polling' = FALSE /\ dropping' = FALSE
                /\ resets' = resets + 1
-               /\ UNCHANGED <<addr, cur, hostSeen, changes>>
+               /\ UNCHANGED <<addr, cur, hostSeen, changes, closes>>
 
-(* ---- host enumeration (requests handled by usb_ctrl_setup) ---- *)
+(* ---- host enumeration ---- *)
 SetAddress == /\ dev = "Default"
               /\ dev' = "Address" /\ addr' = 1
-              /\ UNCHANGED <<cur, lastSent, inflight, hostSeen, changes, resets>>
+              /\ UNCHANGED <<cur, lastSent, inflight, hostSeen,
+                             polling, dropping, changes, resets, closes>>
 
-(* SET_CONFIGURATION 1 is stalled in the Default state; accepted otherwise.
-   Configuring opens EP1 and re-inits the scheduler so a fresh report goes out. *)
 SetConfig == /\ dev = "Address"
              /\ dev' = "Configured" /\ lastSent' = Fresh
-             /\ UNCHANGED <<addr, cur, inflight, hostSeen, changes, resets>>
+             /\ UNCHANGED <<addr, cur, inflight, hostSeen,
+                            polling, dropping, changes, resets, closes>>
 
 HostEnum == SetAddress \/ SetConfig
 
-(* Host polls EP1 every bInterval and takes the queued report. *)
-Poll == /\ inflight # None
-        /\ hostSeen' = inflight /\ inflight' = None
-        /\ UNCHANGED <<dev, addr, cur, lastSent, changes, resets>>
+(* ---- application opens / closes the device ---- *)
+Open == /\ dev = "Configured" /\ ~polling
+        /\ polling' = TRUE /\ dropping' = TRUE
+        /\ UNCHANGED <<dev, addr, cur, lastSent, inflight, hostSeen, changes, resets, closes>>
 
-(* ---- device superloop: one gp_tx_step() with ep_ready = EP1 empty ---- *)
+Close == /\ polling /\ closes < MaxCloses
+         /\ polling' = FALSE /\ dropping' = FALSE /\ closes' = closes + 1
+         /\ UNCHANGED <<dev, addr, cur, lastSent, inflight, hostSeen, changes, resets>>
+
+EndDrop == /\ dropping /\ dropping' = FALSE
+           /\ UNCHANGED <<dev, addr, cur, lastSent, inflight, hostSeen,
+                          polling, changes, resets, closes>>
+
+(* Host takes the queued report; it is discarded inside the drop window. *)
+Poll == /\ polling /\ inflight # None
+        /\ hostSeen' = IF dropping THEN hostSeen ELSE inflight
+        /\ inflight' = None
+        /\ UNCHANGED <<dev, addr, cur, lastSent, polling, dropping, changes, resets, closes>>
+
+(* ---- device superloop: one gp_tx_step() per ms ----
+   Sends on change, and (Keepalive) re-sends the unchanged state when the
+   keepalive period expires; timing is abstracted to "eventually". *)
 Tick == /\ dev = "Configured" /\ inflight = None
-        /\ lastSent # cur
+        /\ (lastSent # cur \/ Keepalive)
         /\ inflight' = cur /\ lastSent' = cur
-        /\ UNCHANGED <<dev, addr, cur, hostSeen, changes, resets>>
+        /\ UNCHANGED <<dev, addr, cur, hostSeen, polling, dropping, changes, resets, closes>>
 
-Next == InputChange \/ BusReset \/ Deconfigure \/ HostEnum \/ Poll \/ Tick
+Next == \/ InputChange \/ BusReset \/ Deconfigure \/ HostEnum
+        \/ Open \/ Close \/ EndDrop \/ Poll \/ Tick
 
 Spec == Init /\ [][Next]_vars
-        /\ WF_vars(HostEnum) /\ WF_vars(Tick) /\ WF_vars(Poll)
+        /\ WF_vars(HostEnum) /\ WF_vars(Open) /\ WF_vars(EndDrop)
+        /\ WF_vars(Poll) /\ WF_vars(Tick)
 
 (* ---- properties ---- *)
 TypeOK == /\ dev \in {"Default", "Address", "Configured"}
-          /\ addr \in {0, 1}
-          /\ cur \in Values
-          /\ lastSent \in Values \cup {None}
-          /\ inflight \in Values \cup {None}
+          /\ addr \in {0, 1} /\ cur \in Values
+          /\ lastSent \in Values \cup {None} /\ inflight \in Values \cup {None}
           /\ hostSeen \in Values \cup {None}
+          /\ polling \in BOOLEAN /\ dropping \in BOOLEAN
 
 ConfiguredHasAddress == dev = "Configured" => addr # 0
 DefaultHasNoAddress  == dev = "Default" => addr = 0
-
-(* EP1 only holds a report while configured; at most one is in flight
-   (inflight is a single slot, and Tick requires it empty). *)
 ReportsOnlyWhenConfigured == inflight # None => dev = "Configured"
-
-(* What is queued is what the scheduler last recorded. *)
 InflightIsLast == inflight # None => inflight = lastSent
+DropOnlyWhilePolling == dropping => polling
 
-(* No change is lost: whenever the device may send, the scheduler's
-   record catches up with the input in that step. *)
+(* No change is lost: whenever the device may send, its record catches up. *)
 NoLostChange == [][(Tick => lastSent' = cur)]_vars
 
-(* Once input and bus go quiet, the host ends up configured and holding
-   exactly the current input state. *)
+(* Once input, bus and the application go quiet (device open), the host
+   ends up holding exactly the current input state. *)
 EventuallyDelivered == <>[](dev = "Configured" /\ hostSeen = cur)
 =============================================================================

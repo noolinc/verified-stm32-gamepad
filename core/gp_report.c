@@ -67,6 +67,17 @@ static bool payload_differs(const uint8_t a[GP_REPORT_SIZE], const uint8_t b[GP_
     return differs;
 }
 
+static uint16_t repeat_period_ms(uint8_t idle_4ms)
+{
+    uint16_t period = (uint16_t)GP_TX_KEEPALIVE_MS;
+
+    if ((idle_4ms != 0U) && (((uint16_t)idle_4ms * 4U) < period))
+    {
+        period = (uint16_t)((uint16_t)idle_4ms * 4U);
+    }
+    return period;
+}
+
 bool gp_tx_step(gp_tx_t *tx, const gp_state_t *state, uint8_t idle_4ms, bool ep_ready,
                 uint8_t out[GP_REPORT_SIZE])
 {
@@ -87,7 +98,7 @@ bool gp_tx_step(gp_tx_t *tx, const gp_state_t *state, uint8_t idle_4ms, bool ep_
     {
         send = true;
     }
-    else if ((idle_4ms != 0U) && (tx->since_ms >= ((uint16_t)idle_4ms * 4U)))
+    else if (tx->since_ms >= repeat_period_ms(idle_4ms))
     {
         send = true;
     }

@@ -37,8 +37,33 @@ static void test_scheduler(void)
     CHECK_EQ(sent, 1);
 }
 
+/* SET_IDLE 0 still gets a keepalive: Linux drops reports for ~50 ms after
+ * an open, so an unchanged state must be repeated (specs/UsbHid.tla). */
+static void test_keepalive(void)
+{
+    gp_tx_t tx; gp_state_t s = { 4u, GP_HAT_NULL, { 0, 0, 0, 0 } };
+    uint8_t r[GP_REPORT_SIZE];
+    int sent = 0;
+    gp_tx_init(&tx);
+    CHECK(gp_tx_step(&tx, &s, 0u, true, r));
+    for (unsigned i = 1; i < GP_TX_KEEPALIVE_MS; i++) sent += gp_tx_step(&tx, &s, 0u, true, r) ? 1 : 0;
+    CHECK_EQ(sent, 0);                                  /* silent inside the period */
+    CHECK(gp_tx_step(&tx, &s, 0u, true, r));            /* repeated at the keepalive */
+    CHECK_EQ(r[0], 4);
+    sent = 0;
+    for (unsigned i = 0; i < 1000u; i++) sent += gp_tx_step(&tx, &s, 0u, true, r) ? 1 : 0;
+    CHECK_EQ(sent, 1000 / GP_TX_KEEPALIVE_MS);          /* steady 20 Hz, no more */
+    /* a host idle rate shorter than the keepalive wins: idle 2 = 8 ms */
+    sent = 0;
+    for (unsigned i = 0; i < 80u; i++) sent += gp_tx_step(&tx, &s, 2u, true, r) ? 1 : 0;
+    CHECK_EQ(sent, 10);
+    /* while the host is not polling the report waits; nothing is consumed */
+    for (unsigned i = 0; i < 200u; i++) CHECK(!gp_tx_step(&tx, &s, 0u, false, r));
+    CHECK(gp_tx_step(&tx, &s, 0u, true, r));            /* overdue: sent at once */
+}
+
 int main(void)
 {
-    test_layout(); test_clamps(); test_scheduler();
+    test_layout(); test_clamps(); test_scheduler(); test_keepalive();
     return check_done("test_report");
 }

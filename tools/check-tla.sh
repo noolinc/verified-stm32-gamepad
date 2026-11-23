@@ -24,7 +24,7 @@ for pair in Debounce:Debounce UsbHid:UsbHid; do
     echo "FAIL $cfg"; grep -E "Error|violated|^State|^/\\\\" <<<"$out" | head -40; status=1
   fi
 done
-for pair in DebounceBug:Debounce UsbHidBug:UsbHid; do
+for pair in DebounceBug:Debounce UsbHidNoKeepalive:UsbHid UsbHidNoReinit:UsbHid; do
   cfg=${pair%%:*}; spec=${pair##*:}
   out=$(run "$cfg" "$spec" || true)
   if grep -qE "is violated|were violated" <<<"$out"; then
