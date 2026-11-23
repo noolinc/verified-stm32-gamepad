@@ -162,6 +162,15 @@ mode = "block"
 timeout_secs = 600
 extensions = ["tla", "cfg", "h"]
 
+[[reification.checks]]
+name = "firmware-build"
+# Cross-compile the STM32F411 image (-Werror) and enforce the flash/RAM budget.
+command = ["sh", "-c", "cmake --preset firmware >/dev/null && cmake --build --preset firmware --clean-first >/dev/null && python3 tools/size_budget.py --profile policy/hardware-profile.toml build/firmware/firmware/stm32f411/gamepad.elf"]
+pass_files = false
+mode = "block"
+timeout_secs = 300
+extensions = ["c", "h", "ld", "txt", "cmake", "json"]
+
 [reification.dependencies]
 proto = [
     "ts",
