@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 cmake --preset firmware >/dev/null
 cmake --build --preset firmware
 bin=build/firmware/firmware/stm32f411/gamepad.bin
-python3 "${PACK_DIR:-$HOME/Research/EmbeddedPolicyPack}/tools/size_budget.py" \
+python3 tools/size_budget.py \
   --profile policy/hardware-profile.toml build/firmware/firmware/stm32f411/gamepad.elf
 case "${1:-dfu}" in
   dfu) dfu-util -a 0 -d 0483:df11 -s 0x08000000:leave -D "$bin" ;;
