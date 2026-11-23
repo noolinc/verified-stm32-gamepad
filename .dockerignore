@@ -1,0 +1,8 @@
+build
+.build
+.nool
+.git
+policy-src/*/target
+sim/GamepadSim
+sim/SimSupport
+sim/Tests
